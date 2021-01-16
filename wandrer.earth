@@ -1,0 +1,61 @@
+// ==UserScript==
+// @name         wandrer.earth updates
+// @namespace    http://davemilsom.com
+// @version      0.1
+// @description  things i think improve wandrer
+// @author       Dave Milsom
+// @match        https://wandrer.earth/*
+// @grant window.onurlchange
+// @grant unsafeWindow
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+$(document).ready(function() {
+    console.log("XXXXXXXXX: DOC READY");
+    urlUpdate(document.location);
+});
+
+if (window.onurlchange === null) {
+    window.addEventListener('urlchange', (info) => urlUpdate(info));
+};
+
+
+function urlUpdate(info) {
+    console.log(JSON.stringify(info));
+    if (document.location.pathname.indexOf("/athletes/") > -1) {
+		showAchievements();
+    }
+}
+
+
+
+function showAchievements() {
+    var areas = {};
+    $('.modal-title').each(function() { var title = $(this).text(); if (title.split('(')[1]) { var area = title.split('(')[0].slice(14, title.split('(')[0].length).trim(); var distance = title.split('(')[1].split(' mi')[0].trim();
+            areas[area] = { area: area, total_distance: distance }; } })
+    var area_arr = [];
+    $('.progress-bar').each(function() {
+        var per = $(this).attr('aria-valuenow');
+        var title = '';
+        $(this).parent().parent().parent().find('span').each(function() {
+            var t = $(this).text();
+            if (t.length > 2) {
+                title = t.trim();
+            }
+
+        });
+        if (areas[title]) {
+            areas[title].percent_finished = per;
+            area_arr.push(areas[title]);
+        }
+    });
+    for (var i = 0; i < area_arr.length; i++) {
+        console.log(',' + area_arr[i].area + ',' + area_arr[i].percent_finished + ',' + area_arr[i].total_distance);
+    }
+
+}
+
+
+})();
